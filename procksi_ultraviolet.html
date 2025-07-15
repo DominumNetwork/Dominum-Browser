@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>procksi (purple mode)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet@latest/public/uv.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet@latest/public/uv.config.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet@latest/public/bare.client.js"></script>
+  <style>
+    :root {
+      /* Default theme (Purple) */
+      --bg-primary: #000;
+      --bg-secondary: #1a001a;
+      --bg-tertiary: #2a0033;
+      --bg-quaternary: #3a0044;
+      --bg-accent: #4a0055;
+      --text-primary: #d0f;
+      --text-secondary: #d0f9;
+      --border-primary: #d0f;
+      --border-secondary: rgba(221, 0, 255, 0.3);
+      --border-tertiary: #d0f3;
+      --accent-primary: #ff00ff;
+      --accent-secondary: #d0f;
+      --shadow-primary: rgba(221, 0, 255, 0.5);
+      --shadow-secondary: rgba(221, 0, 255, 0.3);
+      --shadow-tertiary: rgba(221, 0, 255, 0.2);
+      --error-color: #f00;
+      --warning-color: #ff0;
+      --info-color: #0ff;
+      --success-color: #0f0;
+      --transition-speed: 0.3s;
+    }
+
+    * {
+      box-sizing: border-box;
+      transition: background-color var(--transition-speed) ease, 
+                  color var(--transition-speed) ease, 
+                  border-color var(--transition-speed) ease,
+                  box-shadow var(--transition-speed) ease;
+    }
+    
+    body {
+      margin: 0;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+    
+    /* Loading animation */
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+    
+    @keyframes slideInFromTop {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOutToTop {
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    @keyframes slideInFromRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOutToRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes scaleIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes scaleOut {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes buttonPress {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px var(--accent-secondary); }
+      50% { box-shadow: 0 0 20px var(--accent-secondary), 0 0 30px var(--accent-secondary); }
+      100% { box-shadow: 0 0 5px var(--accent-secondary); }
+    }
+    
+    @keyframes themeTransition {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.95); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    #controls {
+      padding: 0.5rem 1rem;
+      background: var(--bg-secondary);
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      animation: slideInFromTop 0.3s ease-out;
+    }
+    
+    input {
+      flex: 1;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border-primary);
+      border-radius: 4px;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 10px var(--shadow-primary);
+      border-color: var(--accent-primary);
+    }
+    
+    input::placeholder {
+      color: var(--text-secondary);
+    }
+    
+    button {
+      background: rgba(0, 0, 0, 0);
+      color: var(--text-primary);
+      border: 1px solid rgba(0, 0, 0, 0);
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    button svg {
+      width: 100%;
+      height: 100%;
+      max-width: 24px;
+      max-height: 24px;
+      object-fit: contain;
+    }
+
+    button:hover {
+      background: var(--bg-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow-secondary);
+    }
+
+    button:active {
+      animation: buttonPress 0.1s ease;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    #tab-bar {
+      display: flex;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-primary);
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-primary) var(--bg-secondary);
+      animation: slideInFromTop 0.4s ease-out;
+      scroll-behavior: smooth;
+    }
+    
+    #tab-bar::-webkit-scrollbar {
+      height: 5px;
+    }
+    #tab-bar::-webkit-scrollbar-thumb {
+      background-color: var(--border-primary);
+    }
+    #tab-bar::-webkit-scrollbar-track {
+      background-color: var(--bg-secondary);
+    }
+    
+    .tab {
+      padding: 0.5rem 1rem;
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(0,0,0,0);
+      border-radius: 20% 20% 0% 0%;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      max-width: 200px;
+      min-width: 100px;
+      transition: all var(--transition-speed) ease;
+      transform: translateY(0);
+    }
+    
+    .tab.new {
+      animation: slideInFromRight 0.3s ease-out;
+    }
+    
+    .tab.closing {
+      animation: slideOutToRight 0.3s ease-in;
+    }
+    
+    .tab.active {
+      background: var(--bg-quaternary);
+      border: 1px solid var(--border-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 10px var(--shadow-secondary);
+    }
+    
+    .tab:hover:not(.active) {
+      background: var(--bg-accent);
+      transform: translateY(-1px);
+    }
+    
+    .tab-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      transition: color var(--transition-speed) ease;
+    }
+    
+    .tab-close {
+      font-size: 1.2rem;
+      line-height: 1;
+      padding: 0.2rem;
+      border-radius: 50%;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    .tab-close:hover {
+      color: var(--text-primary);
+      background: var(--bg-accent);
+      transform: scale(1.1);
+    }
+    
+    #new-tab {
+      padding: 0.5rem 1rem;
+      background: rgba(42, 0, 51, 0);
+      cursor: pointer;
+      font-size: 1.2rem;
+      border-radius: 100%;
+      transition: all var(--transition-speed) ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+    }
+    
+    #new-tab:hover {
+      background: var(--bg-tertiary);
+      transform: scale(1.1);
+      animation: glow 2s infinite;
+    }
+    
+    #content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .iframe-container {
+      flex: 1;
+      display: none;
+      opacity: 0;
+      transition: opacity var(--transition-speed) ease;
+    }
+    
+    .iframe-container.active {
+      display: block;
+      opacity: 1;
+    }
+    
+    .iframe-container.loading {
+      opacity: 0.7;
+    }
+    
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: var(--bg-primary);
+      transition: opacity var(--transition-speed) ease;
+    }
+    
+    /* Loading overlay */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    .loading-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border-primary);
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Notification system */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-primary);
+      border-radius: 4px;
+      z-index: 1001;
+      transform: translateX(100%);
+      transition: transform var(--transition-speed) ease;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    /* Status bar */
+    .status-bar {
+      background: var(--bg-secondary);
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-primary);
+      animation: slideInFromTop 0.5s ease-out;
+    }
+    
+    .status-updating {
+      animation: pulse 1s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="tab-bar">
+    <div id="new-tab">+</div>
+  </div>
+  
+  <div id="controls">
+    <button id="back-button"><</button>
+    <button id="forward-button">></button>
+    <button id="refresh-button">↻</button>
+    <input id="urlInput" placeholder="Enter URL or search..." />
+    <button id="go-button">Go</button>
+  </div>
+  
+  <div id="content">
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+  
+  <div class="status-bar">
+    <span id="status-text">Ready</span>
+    <span id="tab-count">Tabs: 1</span>
+  </div>
+
+  <script>
+    // Ultraviolet configuration
+    window.__uv$config = {
+      prefix: '/service/',
+      bare: 'https://bare.shuttle.rsc.cdn13.com/v1/',
+      encodeUrl: Ultraviolet.codec.xor.encode,
+      decodeUrl: Ultraviolet.codec.xor.decode,
+    };
+
+    const tabs = [];
+    let activeTabId = null;
+    let tabCounter = 0;
+    
+    // Animation helper functions
+    function showLoadingOverlay() {
+      document.getElementById('loading-overlay').classList.add('active');
+    }
+    
+    function hideLoadingOverlay() {
+      document.getElementById('loading-overlay').classList.remove('active');
+    }
+    
+    function showNotification(message, duration = 3000) {
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.classList.add('show'), 100);
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, duration);
+    }
+    
+    function addStatusAnimation() {
+      const statusText = document.getElementById('status-text');
+      statusText.classList.add('status-updating');
+      setTimeout(() => statusText.classList.remove('status-updating'), 1000);
+    }
+    
+    // URL processing functions
+    function looksLikeUrl(str) {
+      return /\./.test(str) && !/\s/.test(str);
+    }
+
+    function prepareUrl(inputStr) {
+      inputStr = inputStr.trim();
+      if (!inputStr) return null;
+
+      if (looksLikeUrl(inputStr)) {
+        if (!/^https?:\/\//i.test(inputStr)) {
+          inputStr = "https://" + inputStr;
+        }
+        return inputStr;
+      } else {
+        const query = encodeURIComponent(inputStr);
+        return "https://www.duckduckgo.com/?q=" + query;
+      }
+    }
+    
+    // Tab management functions
+    function createNewTab(url = null) {
+      const tabId = 'tab-' + tabCounter++;
+      
+      // Create tab button
+      const tabElement = document.createElement('div');
+      tabElement.className = 'tab new';
+      tabElement.dataset.tabId = tabId;
+      tabElement.innerHTML = 
+        '<span class="tab-title">New Tab</span>' +
+        '<span class="tab-close">×</span>';
+      
+      tabElement.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('tab-close')) {
+          activateTab(tabId);
+        }
+      });
+      
+      // Add close button functionality
+      const closeButton = tabElement.querySelector('.tab-close');
+      closeButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeTab(tabId);
+      });
+      
+      // Insert tab before the new tab button
+      document.getElementById('tab-bar').insertBefore(tabElement, document.getElementById('new-tab'));
+      
+      // Remove 'new' class after animation completes
+      setTimeout(() => {
+        tabElement.classList.remove('new');
+      }, 300);
+      
+      // Create iframe container
+      const iframeContainer = document.createElement('div');
+      iframeContainer.className = 'iframe-container';
+      iframeContainer.id = 'container-' + tabId;
+      
+      const iframe = document.createElement('iframe');
+      iframe.id = 'iframe-' + tabId;
+      iframe.sandbox = "allow-scripts allow-forms allow-same-origin allow-popups allow-top-navigation";
+      
+      // Set initial content to a simple new tab page
+      iframe.srcdoc = [
+        '<!DOCTYPE html>',
+        '<html>',
+        '<head>',
+        '  <style>',
+        '    body { margin: 0; padding: 2rem; font-family: monospace; background: #1a001a; color: #d0f; text-align: center; }',
+        '    h1 { color: #ff00ff; }',
+        '  </style>',
+        '</head>',
+        '<body>',
+        '  <h1>🌟 Procksi Browser</h1>',
+        '  <p>Enter a URL or search term in the address bar above.</p>',
+        '  <p>Powered by Ultraviolet Proxy 🚀</p>',
+        '</body>',
+        '</html>'
+      ].join('\n');
+      
+      iframeContainer.appendChild(iframe);
+      document.getElementById('content').appendChild(iframeContainer);
+      
+      // Add to tabs array
+      tabs.push({
+        id: tabId,
+        title: 'New Tab',
+        url: '',
+        history: [],
+        currentHistoryIndex: -1
+      });
+      
+      // Activate the new tab
+      activateTab(tabId);
+      
+      // If URL is provided, load it
+      if (url) {
+        document.getElementById('urlInput').value = url;
+        loadPageInActiveTab();
+      }
+      
+      updateTabCount();
+      showNotification('New tab created');
+    }
+    
+    function activateTab(tabId) {
+      // Deactivate all tabs
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.iframe-container').forEach(container => {
+        container.classList.remove('active');
+      });
+      
+      // Activate selected tab with animation
+      const selectedTab = document.querySelector('.tab[data-tab-id="' + tabId + '"]');
+      const selectedContainer = document.getElementById('container-' + tabId);
+      
+      selectedTab.classList.add('active');
+      selectedContainer.classList.add('active');
+      
+      // Update active tab ID
+      activeTabId = tabId;
+      
+      // Update URL input with the active tab's URL
+      const tab = tabs.find(t => t.id === tabId);
+      if (tab && tab.url) {
+        document.getElementById('urlInput').value = tab.url;
+      } else {
+        document.getElementById('urlInput').value = '';
+      }
+      
+      updateNavigationButtons();
+    }
+    
+    function closeTab(tabId) {
+      // Don't close if it's the last tab
+      if (tabs.length <= 1) {
+        showNotification('Cannot close the last tab');
+        return;
+      }
+      
+      const tabElement = document.querySelector('.tab[data-tab-id="' + tabId + '"]');
+      const container = document.getElementById('container-' + tabId);
+      
+      // Add closing animation
+      tabElement.classList.add('closing');
+      
+      // Remove elements after animation
+      setTimeout(() => {
+        tabElement.remove();
+        container.remove();
+        
+        // Remove from tabs array
+        const tabIndex = tabs.findIndex(t => t.id === tabId);
+        tabs.splice(tabIndex, 1);
+        
+        // If closing the active tab, activate another one
+        if (activeTabId === tabId) {
+          // Activate the tab to the left, or the first tab if there's none
+          const newActiveTab = tabs[Math.max(0, tabIndex - 1)];
+          activateTab(newActiveTab.id);
+        }
+        
+        updateTabCount();
+        showNotification('Tab closed');
+      }, 300);
+    }
+    
+    function updateTabTitle(tabId, title) {
+      const tab = tabs.find(t => t.id === tabId);
+      if (tab) {
+        tab.title = title || 'Untitled';
+        const tabElement = document.querySelector('.tab[data-tab-id="' + tabId + '"] .tab-title');
+        if (tabElement) {
+          tabElement.textContent = tab.title;
+        }
+      }
+    }
+    
+    // Navigation functions
+    function loadPageInActiveTab() {
+      if (!activeTabId) return;
+
+      const urlInput = document.getElementById('urlInput');
+      let rawInput = urlInput.value.trim();
+      if (!rawInput) {
+        showNotification('Please enter a URL or search term');
+        return;
+      }
+
+      const target = prepareUrl(rawInput);
+      urlInput.value = target;
+
+      const tab = tabs.find(t => t.id === activeTabId);
+      const iframe = document.getElementById('iframe-' + activeTabId);
+      const container = document.getElementById('container-' + activeTabId);
+
+      try {
+        // Show loading state
+        showLoadingOverlay();
+        container.classList.add('loading');
+        updateStatus('Loading ' + target + '...');
+        addStatusAnimation();
+
+        // Use Ultraviolet proxy
+        const encodedUrl = __uv$config.encodeUrl(target);
+        const proxyUrl = window.location.origin + __uv$config.prefix + encodedUrl;
+        
+        iframe.src = proxyUrl;
+
+        // Update tab information
+        tab.url = target;
+
+        // Use domain name as initial title
+        const pageTitle = target.replace(/^https?:\/\//i, '').split('/')[0];
+        updateTabTitle(activeTabId, pageTitle);
+
+        // Add to history
+        if (tab.currentHistoryIndex < tab.history.length - 1) {
+          tab.history = tab.history.slice(0, tab.currentHistoryIndex + 1);
+        }
+        tab.history.push(target);
+        tab.currentHistoryIndex = tab.history.length - 1;
+
+        updateNavigationButtons();
+        updateStatus('Loading: ' + target);
+        addStatusAnimation();
+        showNotification('Loading page: ' + pageTitle);
+
+        // Update title and status when iframe loads
+        iframe.onload = function() {
+          try {
+            const iframeTitle = iframe.contentDocument ? iframe.contentDocument.title : null;
+            if (iframeTitle) {
+              updateTabTitle(activeTabId, iframeTitle);
+              updateStatus('Loaded: ' + target);
+              showNotification('Page loaded: ' + iframeTitle);
+            } else {
+              updateStatus('Loaded: ' + target);
+              showNotification('Page loaded: ' + pageTitle);
+            }
+          } catch (e) {
+            // Cross-origin error - use default title
+            updateStatus('Loaded: ' + target);
+            showNotification('Page loaded: ' + pageTitle);
+          }
+          hideLoadingOverlay();
+          container.classList.remove('loading');
+        };
+
+      } catch (err) {
+        iframe.srcdoc = '<pre style="padding:2rem; color:var(--error-color); font-family: monospace;">Error: ' + err.message + '</pre>';
+        updateStatus('Error: ' + err.message);
+        addStatusAnimation();
+        showNotification('Error loading page: ' + err.message);
+        hideLoadingOverlay();
+        container.classList.remove('loading');
+      }
+    }
+    
+    function navigateBack() {
+      if (!activeTabId) return;
+      
+      const tab = tabs.find(t => t.id === activeTabId);
+      if (tab && tab.currentHistoryIndex > 0) {
+        tab.currentHistoryIndex--;
+        const url = tab.history[tab.currentHistoryIndex];
+        document.getElementById('urlInput').value = url;
+        loadPageInActiveTab();
+        showNotification('Navigated back');
+      }
+    }
+    
+    function navigateForward() {
+      if (!activeTabId) return;
+      
+      const tab = tabs.find(t => t.id === activeTabId);
+      if (tab && tab.currentHistoryIndex < tab.history.length - 1) {
+        tab.currentHistoryIndex++;
+        const url = tab.history[tab.currentHistoryIndex];
+        document.getElementById('urlInput').value = url;
+        loadPageInActiveTab();
+        showNotification('Navigated forward');
+      }
+    }
+    
+    function refreshPage() {
+      if (!activeTabId) return;
+      
+      const tab = tabs.find(t => t.id === activeTabId);
+      if (tab && tab.url) {
+        document.getElementById('urlInput').value = tab.url;
+        loadPageInActiveTab();
+        showNotification('Page refreshed');
+      }
+    }
+    
+    function updateNavigationButtons() {
+      if (!activeTabId) return;
+      
+      const tab = tabs.find(t => t.id === activeTabId);
+      const backButton = document.getElementById('back-button');
+      const forwardButton = document.getElementById('forward-button');
+      
+      backButton.disabled = !tab || tab.currentHistoryIndex <= 0;
+      forwardButton.disabled = !tab || tab.currentHistoryIndex >= tab.history.length - 1;
+    }
+    
+    function updateStatus(message) {
+      document.getElementById('status-text').textContent = message;
+    }
+    
+    function updateTabCount() {
+      document.getElementById('tab-count').textContent = 'Tabs: ' + tabs.length;
+    }
+    
+    // Initialize the browser with one tab
+    document.addEventListener('DOMContentLoaded', () => {
+      createNewTab();
+      
+      // Set up event listeners
+      document.getElementById('new-tab').addEventListener('click', () => createNewTab());
+      document.getElementById('go-button').addEventListener('click', loadPageInActiveTab);
+      document.getElementById('back-button').addEventListener('click', navigateBack);
+      document.getElementById('forward-button').addEventListener('click', navigateForward);
+      document.getElementById('refresh-button').addEventListener('click', refreshPage);
+      
+      // URL input event
+      document.getElementById('urlInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          loadPageInActiveTab();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
