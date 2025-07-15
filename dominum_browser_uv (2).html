@@ -1940,7 +1940,6 @@ candy: {
     let currentTheme = 'purple';
     let selectedTheme = 'purple';
 
-    const proxyBase = "https://api.allorigins.win/raw?url=";
     const tabs = [];
     let activeTabId = null;
     let tabCounter = 0;
@@ -2338,200 +2337,64 @@ candy: {
       }
     }
     
-    function looksLikeUrl(str) {
-      return /\./.test(str) && !/\s/.test(str);
-    }
 
-    function prepareUrl(inputStr) {
-      inputStr = inputStr.trim();
-      if (!inputStr) return null;
-
-      if (looksLikeUrl(inputStr)) {
-        if (!/^https?:\/\//i.test(inputStr)) {
-          inputStr = "https://" + inputStr;
-        }
-        return inputStr;
-      } else {
-        const query = encodeURIComponent(inputStr);
-        return `https://www.duckduckgo.com/${query}`;
-      }
-    }
     
-    async function loadPageInActiveTab() {
+    function loadPageInActiveTab() {
       if (!activeTabId) return;
+
+      const content = document.getElementById("content");
+      const urlInput = document.getElementById("urlInput");
       
-      const input = document.getElementById('urlInput');
-      let rawInput = input.value.trim();
-      if (!rawInput) {
+      let url = urlInput.value.trim();
+      if (!url) {
         showNotification('Please enter a URL or search term');
         return;
       }
       
-      const target = prepareUrl(rawInput);
-      input.value = target;
-      
-      const tab = tabs.find(t => t.id === activeTabId);
-      const iframe = document.getElementById(`iframe-${activeTabId}`);
-      const container = document.getElementById(`container-${activeTabId}`);
-      
-      try {
-        // Show loading state
-        showLoadingOverlay();
-        container.classList.add('loading');
-        updateStatus(`Loading ${target}...`);
-        addStatusAnimation();
-        
-        iframe.srcdoc = `<div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: var(--bg-primary); color: var(--text-primary); font-family: monospace;">
-          <div style="text-align: center;">
-            <div style="width: 40px; height: 40px; border: 3px solid var(--border-primary); border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
-            <div>Loading ${target}...</div>
-          </div>
-          <style>
-            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-          </style>
-        </div>`;
-        
-        const response = await fetch(proxyBase + encodeURIComponent(target));
-        if (!response.ok) throw new Error("Failed to fetch");
-        
-        const html = await response.text();
-        const modifiedHTML = injectProxyScript(html, target);
-        
-        iframe.srcdoc = modifiedHTML;
-        
-        // Update tab information
-        tab.url = target;
-        
-        // Extract title from HTML
-        const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
-        const pageTitle = titleMatch ? titleMatch[1] : target.replace(/^https?:\/\//i, '');
-        updateTabTitle(activeTabId, pageTitle);
-        
-        // Add to history
-        if (tab.currentHistoryIndex < tab.history.length - 1) {
-          // If we navigated back and then to a new page, truncate the forward history
-          tab.history = tab.history.slice(0, tab.currentHistoryIndex + 1);
-        }
-        tab.history.push(target);
-        tab.currentHistoryIndex = tab.history.length - 1;
-        
-        updateNavigationButtons();
-        updateStatus(`Loaded: ${target}`);
-        addStatusAnimation();
-        showNotification(`Page loaded: ${pageTitle}`);
-        
-      } catch (err) {
-        iframe.srcdoc = `<pre style="padding:2rem; color:var(--error-color); font-family: monospace;">Error: ${err.message}</pre>`;
-        updateStatus(`Error: ${err.message}`);
-        addStatusAnimation();
-        showNotification(`Error loading page: ${err.message}`);
-      } finally {
-        hideLoadingOverlay();
-        container.classList.remove('loading');
+      if (!url.startsWith("http")) url = "https://" + url;
+
+      const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
+      const iframeContainer = document.createElement("div");
+      iframeContainer.className = "iframe-container active loading";
+      iframeContainer.id = `container-${activeTabId}`;
+
+      const iframe = document.createElement("iframe");
+      iframe.src = encodedUrl;
+      iframe.id = `iframe-${activeTabId}`;
+      iframe.onload = () => iframeContainer.classList.remove("loading");
+      iframeContainer.appendChild(iframe);
+
+      // Remove existing iframe container for this tab
+      const existingContainer = document.getElementById(`container-${activeTabId}`);
+      if (existingContainer) {
+        existingContainer.remove();
       }
+
+      content.appendChild(iframeContainer);
+      
+      // Update tab information
+      const tab = tabs.find(t => t.id === activeTabId);
+      tab.url = url;
+      
+      // Update tab title (simplified since we can't easily extract title from proxied content)
+      const pageTitle = url.replace(/^https?:\/\//i, '');
+      updateTabTitle(activeTabId, pageTitle);
+      
+      // Add to history
+      if (tab.currentHistoryIndex < tab.history.length - 1) {
+        // If we navigated back and then to a new page, truncate the forward history
+        tab.history = tab.history.slice(0, tab.currentHistoryIndex + 1);
+      }
+      tab.history.push(url);
+      tab.currentHistoryIndex = tab.history.length - 1;
+      
+      updateNavigationButtons();
+      updateStatus(`Loaded: ${url}`);
+      addStatusAnimation();
+      showNotification(`Page loaded: ${pageTitle}`);
     }
     
-    function injectProxyScript(html, baseUrl) {
-      const baseTag = `<base href="${baseUrl}">`;
-      const interceptScript = `
-        <script>
-          // Intercept link clicks
-          document.addEventListener('click', e => {
-            const a = e.target.closest('a[href]');
-            if (a && a.href && a.target !== '_blank') {
-              e.preventDefault();
-              parent.postMessage({ type: 'navigate', href: a.href }, '*');
-            }
-          });
-          
-          // Intercept console methods
-          const originalConsole = {
-            log: console.log,
-            error: console.error,
-            warn: console.warn,
-            info: console.info
-          };
-          
-          console.log = function(...args) {
-            originalConsole.log(...args);
-            parent.postMessage({ 
-              type: 'console', 
-              method: 'log', 
-              args: args.map(arg => String(arg))
-            }, '*');
-          };
-          
-          console.error = function(...args) {
-            originalConsole.error(...args);
-            parent.postMessage({ 
-              type: 'console', 
-              method: 'error', 
-              args: args.map(arg => String(arg))
-            }, '*');
-          };
-          
-          console.warn = function(...args) {
-            originalConsole.warn(...args);
-            parent.postMessage({ 
-              type: 'console', 
-              method: 'warn', 
-              args: args.map(arg => String(arg))
-            }, '*');
-          };
-          
-          console.info = function(...args) {
-            originalConsole.info(...args);
-            parent.postMessage({ 
-              type: 'console', 
-              method: 'info', 
-              args: args.map(arg => String(arg))
-            }, '*');
-          };
-          
-          // Intercept fetch requests for network panel
-          const originalFetch = window.fetch;
-          window.fetch = function(resource, init) {
-            const url = typeof resource === 'string' ? resource : resource.url;
-            parent.postMessage({ 
-              type: 'network', 
-              method: init?.method || 'GET',
-              url: url
-            }, '*');
-            return originalFetch.apply(this, arguments);
-          };
-          
-          // Intercept XHR for network panel
-          const originalXHROpen = XMLHttpRequest.prototype.open;
-          XMLHttpRequest.prototype.open = function(method, url) {
-            this._method = method;
-            this._url = url;
-            return originalXHROpen.apply(this, arguments);
-          };
-          
-          const originalXHRSend = XMLHttpRequest.prototype.send;
-          XMLHttpRequest.prototype.send = function() {
-            parent.postMessage({ 
-              type: 'network', 
-              method: this._method,
-              url: this._url
-            }, '*');
-            return originalXHRSend.apply(this, arguments);
-          };
-        <\/script>
-      `;
-      
-      const styleOverride = `
-        <style>
-          /* Optional: Add any style overrides here */
-        </style>
-      `;
-      
-      if (/<head[^>]*>/i.test(html)) {
-        return html.replace(/<head[^>]*>/i, match => match + baseTag + interceptScript + styleOverride);
-      } else {
-        return baseTag + interceptScript + styleOverride + html;
-      }
-    }
+
     
     function toggleDevTools() {
       const devtools = document.getElementById('devtools');
