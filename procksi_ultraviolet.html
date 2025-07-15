@@ -419,6 +419,522 @@
     .status-updating {
       animation: pulse 1s infinite;
     }
+    
+    #devtools {
+      height: 0;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-primary);
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+    }
+    
+    #devtools.open {
+      height: 30%;
+      transform: translateY(0);
+      box-shadow: 0 -4px 20px var(--shadow-tertiary);
+    }
+    
+    #devtools.opening {
+      animation: slideInFromTop 0.4s ease-out;
+    }
+    
+    #devtools.closing {
+      animation: slideOutToTop 0.4s ease-in;
+    }
+    
+    #devtools-header {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-primary);
+      animation: fadeIn 0.3s ease-out 0.1s both;
+    }
+    
+    #devtools-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      animation: fadeIn 0.3s ease-out 0.2s both;
+    }
+    
+    #devtools-tabs {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .devtools-tab {
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+      border-radius: 4px;
+      position: relative;
+    }
+    
+    .devtools-tab:hover {
+      background: var(--bg-quaternary);
+    }
+    
+    .devtools-tab.active {
+      background: var(--bg-quaternary);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px var(--shadow-secondary);
+    }
+    
+    #devtools-panels {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .devtools-panel {
+      flex: 1;
+      display: none;
+      padding: 0.5rem;
+      overflow: auto;
+      opacity: 0;
+      transition: opacity var(--transition-speed) ease;
+    }
+    
+    .devtools-panel.active {
+      display: flex;
+      flex-direction: column;
+      opacity: 1;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    #console-input {
+      width: 100%;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-primary);
+      padding: 0.5rem;
+      font-family: monospace;
+      margin-top: 0.5rem;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    #console-input:focus {
+      outline: none;
+      box-shadow: 0 0 10px var(--shadow-primary);
+      border-color: var(--accent-primary);
+    }
+    
+    #console-output {
+      flex: 1;
+      overflow: auto;
+      white-space: pre-wrap;
+      padding: 0.5rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      margin-bottom: 0.5rem;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    .console-line {
+      margin-bottom: 0.25rem;
+      border-bottom: 1px solid var(--border-tertiary);
+      padding-bottom: 0.25rem;
+      opacity: 0;
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    
+    .console-error {
+      color: var(--error-color);
+    }
+    .console-warn {
+      color: var(--warning-color);
+    }
+    .console-info {
+      color: var(--info-color);
+    }
+    
+    #js-inject-area {
+      width: 100%;
+      height: 150px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-primary);
+      padding: 0.5rem;
+      font-family: monospace;
+      resize: vertical;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    #js-inject-area:focus {
+      outline: none;
+      box-shadow: 0 0 10px var(--shadow-primary);
+      border-color: var(--accent-primary);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .small-button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    select {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-primary);
+      padding: 0.25rem 0.5rem;
+      font-family: monospace;
+      border-radius: 4px;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    select:focus {
+      outline: none;
+      box-shadow: 0 0 10px var(--shadow-primary);
+      border-color: var(--accent-primary);
+    }
+
+    /* Themes Panel Styles */
+    #themes-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    #themes-panel.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .themes-modal {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-primary);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: scale(0.8);
+      transition: all var(--transition-speed) ease;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    #themes-panel.active .themes-modal {
+      transform: scale(1);
+    }
+    
+    .themes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-primary);
+    }
+    
+    .themes-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+    
+    .themes-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    .themes-close:hover {
+      background: var(--bg-accent);
+      transform: scale(1.1);
+    }
+    
+    .themes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .theme-card {
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border-primary);
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .theme-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px var(--shadow-secondary);
+      border-color: var(--accent-primary);
+    }
+    
+    .theme-card.active {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 20px var(--shadow-primary);
+    }
+    
+    .theme-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    }
+    
+    .theme-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+    
+    .theme-description {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    
+    .theme-preview {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .theme-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid var(--border-primary);
+      transition: all var(--transition-speed) ease;
+    }
+    
+    .theme-color:hover {
+      transform: scale(1.2);
+    }
+    
+    .themes-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-primary);
+    }
+    
+    .themes-info {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    .themes-actions {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .theme-button {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border-primary);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+    }
+    
+    .theme-button:hover {
+      background: var(--bg-accent);
+      transform: translateY(-1px);
+    }
+    
+    .theme-button.primary {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+    
+    .theme-button.primary:hover {
+      background: var(--accent-secondary);
+    }
+    
+    /* Theme transition animation */
+    body.theme-changing {
+      animation: themeTransition 0.5s ease-out;
+    }
+    
+    /* Custom scrollbar for themes panel */
+    .themes-modal::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .themes-modal::-webkit-scrollbar-track {
+      background: var(--bg-tertiary);
+    }
+    
+    .themes-modal::-webkit-scrollbar-thumb {
+      background: var(--border-primary);
+      border-radius: 4px;
+    }
+    
+    .themes-modal::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-primary);
+    }
+
+    .custom-theme-modal {
+      position: fixed;
+      inset: 0;
+      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+    }
+
+    .custom-theme-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .custom-modal-inner {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-primary);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 1100px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .custom-modal-header,
+    .custom-modal-footer {
+      padding: 0.75rem 1rem;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-primary);
+    }
+
+    .custom-modal-footer {
+      border-top: 1px solid var(--border-primary);
+      border-bottom: none;
+    }
+
+    .custom-close {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+
+    .custom-close:hover {
+      background: var(--bg-accent);
+    }
+
+    .custom-modal-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+
+    .custom-modal-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      overflow: hidden;
+    }
+
+    #custom-input-grid {
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .custom-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .custom-group-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--accent-primary);
+    }
+
+    .custom-input-row {
+      display: grid;
+      grid-template-columns: 130px 80px repeat(4, 1fr);
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .custom-input-row label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .custom-input-row input[type="color"],
+    .custom-input-row input[type="range"] {
+      width: 100%;
+    }
+
+    /* Preview section */
+    #custom-preview {
+      padding: 1rem;
+      border-left: 1px solid var(--border-primary);
+      background: var(--bg-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow-y: auto;
+    }
+
+    .preview-box {
+      padding: 0.75rem;
+      border: 1px solid var(--border-secondary);
+      border-radius: 6px;
+    }
+
+    .preview-title {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
   </style>
 </head>
 <body>
@@ -432,6 +948,12 @@
     <button id="refresh-button">↻</button>
     <input id="urlInput" placeholder="Enter URL or search..." />
     <button id="go-button">Go</button>
+    <button id="themes-button"><svg xmlns="http://www.w3.org/2000/svg" width="25px" height="25px" fill="currentColor" class="bi bi-brush" viewBox="0 0 16 16">
+  <path d="M15.825.12a.5.5 0 0 1 .132.584c-1.53 3.43-4.743 8.17-7.095 10.64a6.1 6.1 0 0 1-2.373 1.534c-.018.227-.06.538-.16.868-.201.659-.667 1.479-1.708 1.74a8.1 8.1 0 0 1-3.078.132 4 4 0 0 1-.562-.135 1.4 1.4 0 0 1-.466-.247.7.7 0 0 1-.204-.288.62.62 0 0 1 .004-.443c.095-.245.316-.38.461-.452.394-.197.625-.453.867-.826.095-.144.184-.297.287-.472l.117-.198c.151-.255.326-.54.546-.848.528-.739 1.201-.925 1.746-.896q.19.012.348.048c.062-.172.142-.38.238-.608.261-.619.658-1.419 1.187-2.069 2.176-2.67 6.18-6.206 9.117-8.104a.5.5 0 0 1 .596.04M4.705 11.912a1.2 1.2 0 0 0-.419-.1c-.246-.013-.573.05-.879.479-.197.275-.355.532-.5.777l-.105.177c-.106.181-.213.362-.32.528a3.4 3.4 0 0 1-.76.861c.69.112 1.736.111 2.657-.12.559-.139.843-.569.993-1.06a3 3 0 0 0 .126-.75zm1.44.026c.12-.04.277-.1.458-.183a5.1 5.1 0 0 0 1.535-1.1c1.9-1.996 4.412-5.57 6.052-8.631-2.59 1.927-5.566 4.66-7.302 6.792-.442.543-.795 1.243-1.042 1.826-.121.288-.214.54-.275.72v.001l.575.575zm-4.973 3.04.007-.005zm3.582-3.043.002.001h-.002z"/>
+</svg></button>
+    <button id="toggle-devtools"><svg width="27.5px" height="27.5px" viewBox="0 -0.5 25 25" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+<path d="M14.2354 7.14709C14.3167 6.74092 14.0533 6.3458 13.6471 6.26456C13.2409 6.18333 12.8458 6.44674 12.7646 6.85291L14.2354 7.14709ZM10.7646 16.8529C10.6833 17.2591 10.9467 17.6542 11.3529 17.7354C11.7591 17.8167 12.1542 17.5533 12.2354 17.1471L10.7646 16.8529ZM7.97342 15.4921C8.26837 15.7829 8.74323 15.7795 9.03406 15.4846C9.32488 15.1896 9.32153 14.7148 9.02658 14.4239L7.97342 15.4921ZM5.5 12L4.97342 11.4659C4.83048 11.6069 4.75 11.7993 4.75 12C4.75 12.2007 4.83048 12.3931 4.97342 12.5341L5.5 12ZM9.02658 9.57606C9.32153 9.28523 9.32488 8.81037 9.03406 8.51542C8.74323 8.22047 8.26837 8.21712 7.97342 8.50794L9.02658 9.57606ZM15.9773 14.3782C15.6802 14.6669 15.6735 15.1417 15.9622 15.4387C16.2509 15.7358 16.7257 15.7425 17.0227 15.4538L15.9773 14.3782ZM19.5 12L20.0227 12.5378C20.1667 12.3979 20.2486 12.2061 20.25 12.0053C20.2514 11.8046 20.1723 11.6116 20.0303 11.4697L19.5 12ZM17.0303 8.46967C16.7374 8.17678 16.2626 8.17678 15.9697 8.46967C15.6768 8.76256 15.6768 9.23744 15.9697 9.53033L17.0303 8.46967ZM12.7646 6.85291L10.7646 16.8529L12.2354 17.1471L14.2354 7.14709L12.7646 6.85291ZM9.02658 14.4239L6.02658 11.4659L4.97342 12.5341L7.97342 15.4921L9.02658 14.4239ZM6.02658 12.5341L9.02658 9.57606L7.97342 8.50794L4.97342 11.4659L6.02658 12.5341ZM17.0227 15.4538L20.0227 12.5378L18.9773 11.4622L15.9773 14.3782L17.0227 15.4538ZM20.0303 11.4697L17.0303 8.46967L15.9697 9.53033L18.9697 12.5303L20.0303 11.4697Z"/>
+</svg></button>
   </div>
   
   <div id="content">
@@ -440,9 +962,102 @@
     </div>
   </div>
   
+  <div id="devtools">
+    <div id="devtools-header">
+      <div id="devtools-tabs">
+        <div class="devtools-tab active" data-panel="console">Console</div>
+        <div class="devtools-tab" data-panel="js-inject">JS Inject</div>
+        <div class="devtools-tab" data-panel="network">Network</div>
+      </div>
+      <button id="close-devtools">×</button>
+    </div>
+    <div id="devtools-panels">
+      <div class="devtools-panel active" id="console-panel">
+        <div id="console-output"></div>
+        <input id="console-input" placeholder="Enter JavaScript to execute in the active tab..." />
+      </div>
+      <div class="devtools-panel" id="js-inject-panel">
+        <textarea id="js-inject-area" placeholder="Enter JavaScript code to inject into the active tab..."></textarea>
+        <div class="action-buttons">
+          <button id="inject-js-button">Inject JavaScript</button>
+          <button id="clear-js-button" class="small-button">Clear</button>
+          <button id="save-js-button" class="small-button">Save Snippet</button>
+          <select id="saved-snippets">
+            <option value="">-- Saved Snippets --</option>
+            <option value="document.querySelectorAll('*').forEach(el => el.style.border = '1px solid red')">
+              Highlight All Elements
+            </option>
+            <option value="console.log(document.cookie)">Log Cookies</option>
+            <option value="document.body.style.filter = 'invert(100%)'">Invert Colors</option>
+          </select>
+        </div>
+      </div>
+      <div class="devtools-panel" id="network-panel">
+        <div id="network-log">Network monitoring will appear here...</div>
+        <div class="action-buttons">
+          <button id="clear-network-log">Clear Log</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <div class="status-bar">
     <span id="status-text">Ready</span>
     <span id="tab-count">Tabs: 1</span>
+  </div>
+
+  <!-- Themes Panel -->
+  <div id="themes-panel">
+    <div class="themes-modal">
+      <div class="themes-header">
+        <div class="themes-title">🎨 Theme Selection</div>
+        <button class="themes-close" id="themes-close">×</button>
+      </div>
+      
+      <div class="themes-grid" id="themes-grid">
+        <!-- Theme cards will be generated here -->
+      </div>
+      
+      <div class="themes-footer">
+        <div class="themes-info">
+          Choose a theme to customize your browsing experience
+        </div>
+        <div class="themes-actions">
+          <button class="theme-button" id="reset-theme">Reset to Default</button>
+          <button class="theme-button primary" id="apply-theme">Apply Theme</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="custom-theme-modal" class="custom-theme-modal">
+    <div class="custom-modal-inner">
+      <div class="custom-modal-header">
+        <span class="custom-modal-title">🎨 Build Your Custom Theme</span>
+        <button id="close-custom-modal" class="custom-close">×</button>
+      </div>
+      <div class="custom-modal-body">
+        <div id="custom-input-grid"></div>
+        <div id="custom-preview">
+          <div class="preview-box" style="background: var(--bg-primary); color: var(--text-primary);">
+            <div class="preview-title">Primary Background & Text</div>
+            <p>The quick brown fox jumps over the lazy dog.</p>
+          </div>
+          <div class="preview-box" style="background: var(--bg-accent); color: var(--text-primary);">
+            <div class="preview-title">Accent Background</div>
+            <button class="theme-button">Button</button>
+          </div>
+          <div class="preview-box" style="border-color: var(--border-primary); color: var(--text-primary);">
+            <div class="preview-title">Borders & Shadows</div>
+            <div style="width: 50px; height: 50px; background: var(--accent-primary); box-shadow: 0 0 10px var(--shadow-primary);"></div>
+          </div>
+        </div>
+      </div>
+      <div class="custom-modal-footer">
+        <button class="theme-button" id="cancel-custom">Cancel</button>
+        <button class="theme-button primary" id="save-custom">Save Theme</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -453,6 +1068,124 @@
       encodeUrl: Ultraviolet.codec.xor.encode,
       decodeUrl: Ultraviolet.codec.xor.decode,
     };
+
+    // Theme definitions
+    const themes = {
+      purple: {
+        name: "Purple Haze",
+        description: "The classic purple theme with magenta accents",
+        colors: {
+          '--bg-primary': '#000',
+          '--bg-secondary': '#1a001a',
+          '--bg-tertiary': '#2a0033',
+          '--bg-quaternary': '#3a0044',
+          '--bg-accent': '#4a0055',
+          '--text-primary': '#d0f',
+          '--text-secondary': '#d0f9',
+          '--border-primary': '#d0f',
+          '--border-secondary': 'rgba(221, 0, 255, 0.3)',
+          '--border-tertiary': '#d0f3',
+          '--accent-primary': '#ff00ff',
+          '--accent-secondary': '#d0f',
+          '--shadow-primary': 'rgba(221, 0, 255, 0.5)',
+          '--shadow-secondary': 'rgba(221, 0, 255, 0.3)',
+          '--shadow-tertiary': 'rgba(221, 0, 255, 0.2)',
+          '--error-color': '#f00',
+          '--warning-color': '#ff0',
+          '--info-color': '#0ff',
+          '--success-color': '#0f0',
+          '--transition-speed': '0.3s'
+        },
+        preview: ['#d0f', '#ff00ff', '#2a0033', '#4a0055', '#000']
+      },
+      
+      cyberpunk: {
+        name: "Cyberpunk 2077",
+        description: "Neon-lit future with electric blues and pinks",
+        colors: {
+          '--bg-primary': '#0a0a0a',
+          '--bg-secondary': '#1a1a2e',
+          '--bg-tertiary': '#16213e',
+          '--bg-quaternary': '#0f3460',
+          '--bg-accent': '#533a7b',
+          '--text-primary': '#00ffff',
+          '--text-secondary': '#00ffff99',
+          '--border-primary': '#00ffff',
+          '--border-secondary': 'rgba(0, 255, 255, 0.3)',
+          '--border-tertiary': '#00ffff33',
+          '--accent-primary': '#ff0080',
+          '--accent-secondary': '#00ffff',
+          '--shadow-primary': 'rgba(0, 255, 255, 0.5)',
+          '--shadow-secondary': 'rgba(255, 0, 128, 0.3)',
+          '--shadow-tertiary': 'rgba(0, 255, 255, 0.2)',
+          '--error-color': '#ff0040',
+          '--warning-color': '#ffff00',
+          '--info-color': '#00ffff',
+          '--success-color': '#00ff80',
+          '--transition-speed': '0.3s'
+        },
+        preview: ['#00ffff', '#ff0080', '#16213e', '#533a7b', '#0a0a0a']
+      },
+      
+      matrix: {
+        name: "Matrix Code",
+        description: "Digital rain in the machine",
+        colors: {
+          '--bg-primary': '#000000',
+          '--bg-secondary': '#001100',
+          '--bg-tertiary': '#002200',
+          '--bg-quaternary': '#003300',
+          '--bg-accent': '#004400',
+          '--text-primary': '#00ff00',
+          '--text-secondary': '#00ff0099',
+          '--border-primary': '#00ff00',
+          '--border-secondary': 'rgba(0, 255, 0, 0.3)',
+          '--border-tertiary': '#00ff0033',
+          '--accent-primary': '#33ff33',
+          '--accent-secondary': '#00ff00',
+          '--shadow-primary': 'rgba(0, 255, 0, 0.5)',
+          '--shadow-secondary': 'rgba(0, 255, 0, 0.3)',
+          '--shadow-tertiary': 'rgba(0, 255, 0, 0.2)',
+          '--error-color': '#ff0000',
+          '--warning-color': '#ffff00',
+          '--info-color': '#00ffff',
+          '--success-color': '#00ff00',
+          '--transition-speed': '0.3s'
+        },
+        preview: ['#00ff00', '#33ff33', '#002200', '#004400', '#000000']
+      },
+      
+      dracula: {
+        name: "Dracula",
+        description: "Classic dark with vampiric purples",
+        colors: {
+          '--bg-primary': '#0b0d16',
+          '--bg-secondary': '#1e2029',
+          '--bg-tertiary': '#282a36',
+          '--bg-quaternary': '#343746',
+          '--bg-accent': '#44475a',
+          '--text-primary': '#f8f8f2',
+          '--text-secondary': '#f8f8f299',
+          '--border-primary': '#bd93f9',
+          '--border-secondary': 'rgba(189,147,249,0.3)',
+          '--border-tertiary': '#bd93f933',
+          '--accent-primary': '#ff79c6',
+          '--accent-secondary': '#bd93f9',
+          '--shadow-primary': 'rgba(189,147,249,0.5)',
+          '--shadow-secondary': 'rgba(255,121,198,0.3)',
+          '--shadow-tertiary': 'rgba(189,147,249,0.2)',
+          '--error-color': '#ff5555',
+          '--warning-color': '#f1fa8c',
+          '--info-color': '#8be9fd',
+          '--success-color': '#50fa7b',
+          '--transition-speed': '0.3s'
+        },
+        preview: ['#bd93f9', '#ff79c6', '#282a36', '#44475a', '#0b0d16']
+      }
+    };
+
+    let currentTheme = 'purple';
+    let selectedTheme = 'purple';
 
     const tabs = [];
     let activeTabId = null;
@@ -484,6 +1217,124 @@
       const statusText = document.getElementById('status-text');
       statusText.classList.add('status-updating');
       setTimeout(() => statusText.classList.remove('status-updating'), 1000);
+    }
+    
+    // Theme functions
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('procksiTheme');
+      if (savedTheme && themes[savedTheme]) {
+        currentTheme = savedTheme;
+        selectedTheme = savedTheme;
+        applyTheme(savedTheme);
+      }
+    }
+    
+    function applyTheme(themeId) {
+      const theme = themes[themeId];
+      if (!theme) return;
+      
+      // Add theme changing animation
+      document.body.classList.add('theme-changing');
+      
+      // Apply CSS variables
+      const root = document.documentElement;
+      Object.entries(theme.colors).forEach(([property, value]) => {
+        root.style.setProperty(property, value);
+      });
+      
+      // Update title
+      document.title = 'procksi (' + theme.name + ')';
+      
+      // Save to localStorage
+      localStorage.setItem('procksiTheme', themeId);
+      currentTheme = themeId;
+      
+      // Remove animation class
+      setTimeout(() => {
+        document.body.classList.remove('theme-changing');
+      }, 500);
+      
+      showNotification('Theme changed to ' + theme.name);
+    }
+    
+    function generateThemeCards() {
+      const grid = document.getElementById('themes-grid');
+      grid.innerHTML = '';
+      
+      Object.entries(themes).forEach(([id, theme]) => {
+        const card = document.createElement('div');
+        card.className = 'theme-card';
+        card.dataset.themeId = id;
+        
+        if (id === currentTheme) {
+          card.classList.add('active');
+        }
+        
+        card.innerHTML = 
+          '<div class="theme-name">' + theme.name + '</div>' +
+          '<div class="theme-description">' + theme.description + '</div>' +
+          '<div class="theme-preview">' +
+            theme.preview.map(function(color) { 
+              return '<div class="theme-color" style="background-color: ' + color + '"></div>'; 
+            }).join('') +
+          '</div>';
+        
+        card.addEventListener('click', () => {
+          // Remove active class from all cards
+          document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+          
+          // Add active class to clicked card
+          card.classList.add('active');
+          selectedTheme = id;
+          
+          // Preview the theme
+          previewTheme(id);
+        });
+        
+        grid.appendChild(card);
+      });
+    }
+    
+    function previewTheme(themeId) {
+      const theme = themes[themeId];
+      if (!theme) return;
+      
+      // Apply theme temporarily for preview
+      const root = document.documentElement;
+      Object.entries(theme.colors).forEach(([property, value]) => {
+        root.style.setProperty(property, value);
+      });
+    }
+    
+    function openThemesPanel() {
+      generateThemeCards();
+      document.getElementById('themes-panel').classList.add('active');
+      selectedTheme = currentTheme;
+    }
+    
+    function closeThemesPanel() {
+      document.getElementById('themes-panel').classList.remove('active');
+      
+      // Restore current theme if user didn't apply
+      if (selectedTheme !== currentTheme) {
+        applyTheme(currentTheme);
+      }
+    }
+    
+    function resetTheme() {
+      selectedTheme = 'purple';
+      applyTheme('purple');
+      
+      // Update active card
+      document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+      document.querySelector('.theme-card[data-theme-id="purple"]').classList.add('active');
+    }
+    
+    function applySelectedTheme() {
+      if (selectedTheme !== currentTheme) {
+        applyTheme(selectedTheme);
+      }
+      closeThemesPanel();
     }
     
     // URL processing functions
@@ -801,21 +1652,243 @@
       document.getElementById('tab-count').textContent = 'Tabs: ' + tabs.length;
     }
     
+    // Developer tools functions
+    function toggleDevTools() {
+      const devtools = document.getElementById('devtools');
+      const isOpen = devtools.classList.contains('open');
+      
+      if (isOpen) {
+        devtools.classList.add('closing');
+        setTimeout(() => {
+          devtools.classList.remove('open', 'closing');
+        }, 400);
+        showNotification('Developer tools closed');
+      } else {
+        devtools.classList.add('opening');
+        devtools.classList.add('open');
+        setTimeout(() => {
+          devtools.classList.remove('opening');
+        }, 400);
+        showNotification('Developer tools opened');
+      }
+    }
+    
+    function closeDevTools() {
+      const devtools = document.getElementById('devtools');
+      devtools.classList.add('closing');
+      setTimeout(() => {
+        devtools.classList.remove('open', 'closing');
+      }, 400);
+      showNotification('Developer tools closed');
+    }
+    
+    function handleConsoleInput(e) {
+      if (e.key === 'Enter') {
+        const input = document.getElementById('console-input');
+        const code = input.value;
+        
+        if (!code.trim()) return;
+        
+        // Log the input to the console output
+        appendToConsole('log', '> ' + code);
+        
+        // Execute in the active iframe
+        executeInActiveTab(code);
+        
+        // Clear the input
+        input.value = '';
+      }
+    }
+    
+    function executeInActiveTab(code) {
+      if (!activeTabId) return;
+      
+      const iframe = document.getElementById('iframe-' + activeTabId);
+      try {
+        // Execute the code in the iframe and get the result
+        const result = iframe.contentWindow.eval([
+          'try {',
+          '  const result = eval(' + JSON.stringify(code) + ');',
+          '  if (result !== undefined) {',
+          '    console.log(result);',
+          '  }',
+          '  "SUCCESS";',
+          '} catch (e) {',
+          '  console.error(e.message);',
+          '  "ERROR: " + e.message;',
+          '}'
+        ].join('\n'));
+        
+        if (result && result.startsWith && result.startsWith('ERROR:')) {
+          appendToConsole('error', result);
+        }
+      } catch (e) {
+        appendToConsole('error', 'Failed to execute: ' + e.message);
+      }
+    }
+    
+    function injectJavaScript() {
+      const code = document.getElementById('js-inject-area').value;
+      if (!code.trim()) {
+        showNotification('Please enter JavaScript code to inject');
+        return;
+      }
+      
+      executeInActiveTab(code);
+      updateStatus('JavaScript injected');
+      addStatusAnimation();
+      showNotification('JavaScript code injected');
+    }
+    
+    function appendToConsole(type, message) {
+      const consoleOutput = document.getElementById('console-output');
+      const line = document.createElement('div');
+      line.className = 'console-line console-' + type;
+      line.textContent = message;
+      consoleOutput.appendChild(line);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+    
+    function saveJavaScriptSnippet() {
+      const code = document.getElementById('js-inject-area').value;
+      if (!code.trim()) {
+        showNotification('Please enter JavaScript code to save');
+        return;
+      }
+      
+      const snippetName = prompt('Enter a name for this snippet:');
+      if (!snippetName) return;
+      
+      // Get existing snippets
+      let savedSnippets = JSON.parse(localStorage.getItem('procksiSnippets') || '{}');
+      savedSnippets[snippetName] = code;
+      
+      // Save back to localStorage
+      localStorage.setItem('procksiSnippets', JSON.stringify(savedSnippets));
+      
+      // Update the dropdown
+      loadSavedSnippetsFromStorage();
+      updateStatus('Snippet "' + snippetName + '" saved');
+      addStatusAnimation();
+      showNotification('Snippet "' + snippetName + '" saved');
+    }
+    
+    function loadSavedSnippetsFromStorage() {
+      const savedSnippets = JSON.parse(localStorage.getItem('procksiSnippets') || '{}');
+      const select = document.getElementById('saved-snippets');
+      
+      // Clear existing options except the first one
+      while (select.options.length > 1) {
+        select.remove(1);
+      }
+      
+      // Add snippets from storage
+      for (const [name, code] of Object.entries(savedSnippets)) {
+        const option = document.createElement('option');
+        option.value = code;
+        option.textContent = name;
+        select.appendChild(option);
+      }
+    }
+    
+    function loadSavedSnippet(e) {
+      const code = e.target.value;
+      if (code) {
+        document.getElementById('js-inject-area').value = code;
+        showNotification('Snippet loaded');
+      }
+      // Reset the select
+      setTimeout(() => {
+        e.target.selectedIndex = 0;
+      }, 100);
+    }
+    
     // Initialize the browser with one tab
     document.addEventListener('DOMContentLoaded', () => {
+      // Load saved theme
+      loadTheme();
+      
       createNewTab();
       
-      // Set up event listeners
+      // Set up basic event listeners
       document.getElementById('new-tab').addEventListener('click', () => createNewTab());
       document.getElementById('go-button').addEventListener('click', loadPageInActiveTab);
       document.getElementById('back-button').addEventListener('click', navigateBack);
       document.getElementById('forward-button').addEventListener('click', navigateForward);
       document.getElementById('refresh-button').addEventListener('click', refreshPage);
       
+      // Developer tools event listeners
+      document.getElementById('toggle-devtools').addEventListener('click', toggleDevTools);
+      document.getElementById('close-devtools').addEventListener('click', closeDevTools);
+      document.getElementById('console-input').addEventListener('keydown', handleConsoleInput);
+      document.getElementById('inject-js-button').addEventListener('click', injectJavaScript);
+      document.getElementById('clear-js-button').addEventListener('click', () => {
+        document.getElementById('js-inject-area').value = '';
+        showNotification('JavaScript area cleared');
+      });
+      document.getElementById('save-js-button').addEventListener('click', saveJavaScriptSnippet);
+      document.getElementById('saved-snippets').addEventListener('change', loadSavedSnippet);
+      document.getElementById('clear-network-log').addEventListener('click', () => {
+        document.getElementById('network-log').innerHTML = 'Network log cleared...';
+        showNotification('Network log cleared');
+      });
+      
+      // Themes panel event listeners
+      document.getElementById('themes-button').addEventListener('click', openThemesPanel);
+      document.getElementById('themes-close').addEventListener('click', closeThemesPanel);
+      document.getElementById('reset-theme').addEventListener('click', resetTheme);
+      document.getElementById('apply-theme').addEventListener('click', applySelectedTheme);
+      
+      // Close themes panel on backdrop click
+      document.getElementById('themes-panel').addEventListener('click', (e) => {
+        if (e.target.id === 'themes-panel') {
+          closeThemesPanel();
+        }
+      });
+      
+      // Escape key to close themes panel
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('themes-panel').classList.contains('active')) {
+          closeThemesPanel();
+        }
+      });
+      
+      // Set up devtools tabs
+      document.querySelectorAll('.devtools-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+          document.querySelectorAll('.devtools-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.devtools-panel').forEach(p => p.classList.remove('active'));
+          
+          e.target.classList.add('active');
+          const panelId = e.target.dataset.panel;
+          document.getElementById(panelId + '-panel').classList.add('active');
+        });
+      });
+      
+      // Load saved snippets from localStorage
+      loadSavedSnippetsFromStorage();
+      
       // URL input event
       document.getElementById('urlInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           loadPageInActiveTab();
+        }
+      });
+      
+      // Handle messages from iframes
+      window.addEventListener("message", e => {
+        if (e.data && e.data.type === "navigate" && e.data.href) {
+          document.getElementById('urlInput').value = e.data.href;
+          loadPageInActiveTab();
+        } else if (e.data && e.data.type === "console") {
+          appendToConsole(e.data.method, e.data.args.join(' '));
+        } else if (e.data && e.data.type === "network") {
+          const networkLog = document.getElementById('network-log');
+          const entry = document.createElement('div');
+          entry.className = 'console-line';
+          entry.textContent = e.data.method + ': ' + e.data.url;
+          networkLog.appendChild(entry);
+          networkLog.scrollTop = networkLog.scrollHeight;
         }
       });
     });
