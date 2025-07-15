@@ -2007,13 +2007,14 @@ candy: {
           card.classList.add('active');
         }
         
-        card.innerHTML = `
-          <div class="theme-name">${theme.name}</div>
-          <div class="theme-description">${theme.description}</div>
-          <div class="theme-preview">
-            ${theme.preview.map(color => `<div class="theme-color" style="background-color: ${color}"></div>`).join('')}
-          </div>
-        `;
+        card.innerHTML = 
+          '<div class="theme-name">' + theme.name + '</div>' +
+          '<div class="theme-description">' + theme.description + '</div>' +
+          '<div class="theme-preview">' +
+            theme.preview.map(function(color) { 
+              return '<div class="theme-color" style="background-color: ' + color + '"></div>'; 
+            }).join('') +
+          '</div>';
         
         card.addEventListener('click', () => {
           // Remove active class from all cards
@@ -2883,14 +2884,13 @@ candy: {
           const row = document.createElement('div');
           row.className = 'custom-input-row';
 
-          row.innerHTML = `
-            <label>${v.replace('--', '')}</label>
-            <input type="color" value="${rgbaToHex(rgba)}" data-type="color" data-var="${v}">
-            <input type="range" min="0" max="360" step="1" value="${rgbToHsl(rgba).h}" data-type="h" data-var="${v}" title="Hue">
-            <input type="range" min="0" max="100" step="1" value="${rgbToHsl(rgba).s}" data-type="s" data-var="${v}" title="Saturation">
-            <input type="range" min="0" max="100" step="1" value="${rgbToHsl(rgba).l}" data-type="l" data-var="${v}" title="Lightness">
-            <input type="range" min="0" max="100" step="1" value="${Math.round(rgba.a * 100)}" data-type="alpha" data-var="${v}" title="Opacity">
-          `;
+          row.innerHTML = 
+            '<label>' + v.replace('--', '') + '</label>' +
+            '<input type="color" value="' + rgbaToHex(rgba) + '" data-type="color" data-var="' + v + '">' +
+            '<input type="range" min="0" max="360" step="1" value="' + rgbToHsl(rgba).h + '" data-type="h" data-var="' + v + '" title="Hue">' +
+            '<input type="range" min="0" max="100" step="1" value="' + rgbToHsl(rgba).s + '" data-type="s" data-var="' + v + '" title="Saturation">' +
+            '<input type="range" min="0" max="100" step="1" value="' + rgbToHsl(rgba).l + '" data-type="l" data-var="' + v + '" title="Lightness">' +
+            '<input type="range" min="0" max="100" step="1" value="' + Math.round(rgba.a * 100) + '" data-type="alpha" data-var="' + v + '" title="Opacity">';
 
           groupWrap.appendChild(row);
         });
