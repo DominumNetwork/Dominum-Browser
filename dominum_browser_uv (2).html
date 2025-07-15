@@ -2104,27 +2104,30 @@ candy: {
     // Initialize Ultraviolet service worker
     async function initializeUV() {
       try {
-        await navigator.serviceWorker.register('/sw.js', {
-          scope: '/service/',
+        // Try to register service worker with current directory path
+        const swPath = window.location.pathname.replace('dominum_browser_uv (2).html', 'sw.js');
+        await navigator.serviceWorker.register(swPath, {
+          scope: window.location.pathname.replace('dominum_browser_uv (2).html', 'service/'),
         });
         showNotification('Proxy service initialized successfully');
       } catch (error) {
-        console.error('Service worker registration failed:', error);
-        showNotification('Failed to initialize proxy service', 'error');
+        console.warn('Service worker registration failed:', error);
+        showNotification('Proxy service unavailable - using fallback mode');
       }
     }
 
     // Initialize the browser with one tab
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Initialize Ultraviolet
-      if ('serviceWorker' in navigator) {
-        await initializeUV();
-      }
-      
-      // Load saved theme
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load saved theme first
       loadTheme();
       
+      // Create initial tab
       createNewTab();
+      
+      // Initialize Ultraviolet in background (non-blocking)
+      if ('serviceWorker' in navigator) {
+        initializeUV().catch(err => console.warn('UV initialization failed:', err));
+      }
       
       // Set up event listeners
       document.getElementById('new-tab').addEventListener('click', () => createNewTab());
@@ -2420,12 +2423,26 @@ candy: {
           </style>
         </div>`;
         
-        // Use Ultraviolet proxy instead of CORS proxy
-        const encodedUrl = uvConfig.encodeUrl(target);
-        const proxyUrl = window.location.origin + uvConfig.prefix + encodedUrl;
-        
-        // Load the page through Ultraviolet
-        iframe.src = proxyUrl;
+        // Check if service worker is active, otherwise use fallback
+        let proxyUrl;
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          // Use Ultraviolet proxy
+          const encodedUrl = uvConfig.encodeUrl(target);
+          proxyUrl = window.location.origin + uvConfig.prefix + encodedUrl;
+          iframe.src = proxyUrl;
+        } else {
+          // Fallback: Use CORS proxy for basic functionality
+          try {
+            const fallbackProxy = "https://api.allorigins.win/raw?url=";
+            const response = await fetch(fallbackProxy + encodeURIComponent(target));
+            if (!response.ok) throw new Error("Failed to fetch");
+            
+            const html = await response.text();
+            iframe.srcdoc = html;
+          } catch (fallbackError) {
+            throw new Error(`Proxy unavailable: ${fallbackError.message}`);
+          }
+        }
         
         // Update tab information
         tab.url = target;
