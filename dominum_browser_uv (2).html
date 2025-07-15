@@ -1940,7 +1940,18 @@ candy: {
     let currentTheme = 'purple';
     let selectedTheme = 'purple';
 
-    const proxyBase = "https://api.allorigins.win/raw?url=";
+    // Ultraviolet configuration
+    let uvConfig = {
+      prefix: "/service/",
+      bare: "https://bare.pussygang.tk/",
+      encodeUrl: Ultraviolet.codec.xor.encode,
+      decodeUrl: Ultraviolet.codec.xor.decode,
+      handler: "/uv/uv.handler.js",
+      client: "/uv/uv.client.js",
+      bundle: "/uv/uv.bundle.js",
+      config: "/uv/uv.config.js",
+      sw: "/uv/uv.sw.js",
+    };
     const tabs = [];
     let activeTabId = null;
     let tabCounter = 0;
@@ -2090,8 +2101,26 @@ candy: {
       setTimeout(() => statusText.classList.remove('status-updating'), 1000);
     }
     
+    // Initialize Ultraviolet service worker
+    async function initializeUV() {
+      try {
+        await navigator.serviceWorker.register('/sw.js', {
+          scope: '/service/',
+        });
+        showNotification('Proxy service initialized successfully');
+      } catch (error) {
+        console.error('Service worker registration failed:', error);
+        showNotification('Failed to initialize proxy service', 'error');
+      }
+    }
+
     // Initialize the browser with one tab
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Initialize Ultraviolet
+      if ('serviceWorker' in navigator) {
+        await initializeUV();
+      }
+      
       // Load saved theme
       loadTheme();
       
@@ -2353,7 +2382,7 @@ candy: {
         return inputStr;
       } else {
         const query = encodeURIComponent(inputStr);
-        return `https://www.duckduckgo.com/${query}`;
+        return `https://www.duckduckgo.com/?q=${query}`;
       }
     }
     
@@ -2391,20 +2420,18 @@ candy: {
           </style>
         </div>`;
         
-        const response = await fetch(proxyBase + encodeURIComponent(target));
-        if (!response.ok) throw new Error("Failed to fetch");
+        // Use Ultraviolet proxy instead of CORS proxy
+        const encodedUrl = uvConfig.encodeUrl(target);
+        const proxyUrl = window.location.origin + uvConfig.prefix + encodedUrl;
         
-        const html = await response.text();
-        const modifiedHTML = injectProxyScript(html, target);
-        
-        iframe.srcdoc = modifiedHTML;
+        // Load the page through Ultraviolet
+        iframe.src = proxyUrl;
         
         // Update tab information
         tab.url = target;
         
-        // Extract title from HTML
-        const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
-        const pageTitle = titleMatch ? titleMatch[1] : target.replace(/^https?:\/\//i, '');
+        // Use domain name as initial title
+        const pageTitle = target.replace(/^https?:\/\//i, '').split('/')[0];
         updateTabTitle(activeTabId, pageTitle);
         
         // Add to history
@@ -2416,16 +2443,31 @@ candy: {
         tab.currentHistoryIndex = tab.history.length - 1;
         
         updateNavigationButtons();
-        updateStatus(`Loaded: ${target}`);
+        updateStatus(`Loading: ${target}`);
         addStatusAnimation();
-        showNotification(`Page loaded: ${pageTitle}`);
+        showNotification(`Loading page: ${pageTitle}`);
+        
+        // Update title and status when iframe loads
+        iframe.onload = () => {
+          try {
+            const iframeTitle = iframe.contentDocument?.title || pageTitle;
+            updateTabTitle(activeTabId, iframeTitle);
+            updateStatus(`Loaded: ${target}`);
+            showNotification(`Page loaded: ${iframeTitle}`);
+          } catch (e) {
+            // Cross-origin error - use default title
+            updateStatus(`Loaded: ${target}`);
+            showNotification(`Page loaded: ${pageTitle}`);
+          }
+          hideLoadingOverlay();
+          container.classList.remove('loading');
+        };
         
       } catch (err) {
         iframe.srcdoc = `<pre style="padding:2rem; color:var(--error-color); font-family: monospace;">Error: ${err.message}</pre>`;
         updateStatus(`Error: ${err.message}`);
         addStatusAnimation();
         showNotification(`Error loading page: ${err.message}`);
-      } finally {
         hideLoadingOverlay();
         container.classList.remove('loading');
       }
